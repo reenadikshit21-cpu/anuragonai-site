@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The math: Tesla Roadster 0.55 s | Anurag on AI</title>
+<style>body{font:17px/1.6 system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#1c1a17;background:#faf8f4}h1{font-size:30px}h2{margin-top:32px;font-size:21px}table{border-collapse:collapse;margin:12px 0}td,th{border:1px solid #d8d2c6;padding:6px 12px;text-align:left}code{background:#efeae0;padding:1px 5px;border-radius:4px}a{color:#c2501f}</style></head><body>
+<h1>The math behind &quot;0.55 s? Does it add up?&quot; (full sheet)</h1>
+<p>Every input is either <strong>claimed by Tesla (T)</strong>, <strong>reported by one outlet (R)</strong> or <strong>my assumption (A)</strong>. Everything else is arithmetic you can redo with a calculator. Script: <code>calc.py</code> (Python, no libraries; run <code>python3 calc.py</code>).</p>
+<p>Constants: g = 9.81 m/s². 1 mph = 0.44704 m/s, so 60 mph = 26.82 m/s. 1 atm = 101,325 Pa.</p>
+<h2>1. What 0–60 in t seconds demands</h2>
+<p>Average acceleration a = 26.82 / t.</p>
+<table><tr><th>0–60 time</th><th>a (m/s²)</th><th>in g</th></tr><tr><td>1.00 s (recorded at the event)</td><td>26.8</td><td>2.73</td></tr><tr><td>0.81 s (live timer)</td><td>33.1</td><td>3.38</td></tr><tr><td>0.67 s (Tesla reply, &quot;rollout subtracted&quot;)</td><td>40.0</td><td>4.08</td></tr><tr><td>0.59 s (Rocket spec)</td><td>45.5</td><td>4.63</td></tr><tr><td>0.55 s (interview claim)</td><td>48.8</td><td>4.97</td></tr></table>
+<p>Average only; the peak at the start is higher. Rollout (the first foot or so that timing rigs ignore) is not modelled.</p>
+<h2>2. Tyres alone (A: μ = 1.2 to 1.6)</h2>
+<p>Friction limit a_max = μ g (no downforce). All wheels driven: still μ g.</p>
+<p>μ = 1.2 → 1.2 g. μ = 1.6 → 1.6 g. So 2.7 g or more needs something that is not tyre friction (downforce or thrust).</p>
+<h2>3. Thrust alone (T: &gt;80 kN; mass not published, R: ~1,700 kg, A: ~2,350 kg)</h2>
+<p>a = F / m.</p>
+<p>1,700 kg: 80,000 / 1,700 = 47.1 m/s² = 4.8 g. 2,350 kg: 34.0 m/s² = 3.5 g.</p>
+<h2>4. Motor power (T: &gt;1 MW)</h2>
+<p>F = P / v. At 10 mph: 223.7 kN. At 30 mph: 74.6 kN. At 60 mph: 37.3 kN. At low speed the limit is tyre grip, not power.</p>
+<h2>5. Does the gas last? (T: 600 L, R: ~250 kg of gas; A: nitrogen at room temperature)</h2>
+<p>Mass flow = thrust / exhaust speed: ṁ = F / v_e.</p>
+<p>Cold nitrogen exit speed has a physical upper bound of about 780 m/s (full expansion), realistically 600–700.</p>
+<p>At v_e = 700 m/s: ṁ = 80,000 / 700 = 114 kg/s. 250 kg / 114 kg/s = 2.2 s.</p>
+<p>At 600 m/s: 1.9 s. At 780 m/s: 2.4 s.</p>
+<p>Reported burn is ~5–6 s. To burn 250 kg in 6 s: ṁ = 42 kg/s, and 80 kN would need v_e = 1,920 m/s, which cold gas can&#x27;t do. So either 80 kN is a peak (average at 700 m/s over 6 s = 29 kN), or the burn is pulsed, or the figures differ. That is the open question.</p>
+<h2>6. Fans and downforce (A: sealed underbody area 2.0 m²)</h2>
+<p>Downforce D = Δp × A. To hold the car upside down: D ≥ m g.</p>
+<p>1,700 kg: 16.7 kN → Δp = 8.3 kPa (8.2% of an atmosphere). 2,350 kg: 23.1 kN → 11.5 kPa (11.4%).</p>
+<p>Hard ceiling: Δp can&#x27;t exceed 1 atm, so D ≤ 203 kN at 2 m².</p>
+<p>Extra grip from downforce at μ = 1.5: 1,000 kgf → 14.7 kN; 2,000 kgf → 29.4 kN; 4,700 kgf → 69.2 kN.</p>
+<p>(The 4,700 on the demo HUD is a gauge reading, not a published spec.)</p>
+<h2>7. Stored gas energy (R: 10,000 psi; T: 600 L)</h2>
+<p>Isothermal E ≈ p V ln(p/p0) = 690e5 × 0.6 × ln(690e5/101325) ≈ 270 MJ (75 kWh). Over 6 s that is 45 MW of gas power, against about 28 MW of jet power (80 kN × 700 m/s / 2). Plausible order of magnitude; not a proof of anything.</p>
+<h2>8. Hover and turning (A: lever arm 1 m, thruster 2 kN, inertia I = m k², k = 1.2 m)</h2>
+<p>Hover needs T ≥ m g: 16.7 kN (1,700 kg) or 23.1 kN (2,350 kg), i.e. 21–29% of 80 kN. Gas at 700 m/s: 23.8–32.9 kg/s, so 250 kg lasts 7.6–10.5 s of pure hover.</p>
+<p>Turn: τ = r F = 1 m × 2 kN = 2 kN·m; I = 2,000 × 1.2² = 2,880 kg·m²; α = τ / I = 0.69 rad/s²; a half-turn from rest takes sqrt(2π / α) = 3.0 s.</p>
+<h2>What would settle it (from the video)</h2>
+<p>1. An independent timed run with the rollout rule stated. 2. The car&#x27;s weight. 3. Tank pressure and the thrust curve over time. 4. A real downforce number, not just an upside-down claim.</p>
+<p>All numbers are from the 15 Oct 2026 reveal coverage (Electrek, CNBC, TechCrunch, Teslarati, InsideEVs). I&#x27;m checking arithmetic, not accusing anyone.</p>
+<hr><p>Video: <a href="https://www.youtube.com/@AnuragonAi">Anurag on AI on YouTube</a> · Script: <a href="calc.py">calc.py</a> · <a href="index.html">Home</a></p></body></html>
