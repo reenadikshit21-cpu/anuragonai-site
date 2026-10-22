@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The math: Claude Duet | Anurag on AI</title>
+<style>body{font:17px/1.6 system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#1c1a17;background:#faf8f4}h1{font-size:30px}h2{margin-top:32px;font-size:21px}table{border-collapse:collapse;margin:12px 0}td,th{border:1px solid #d8d2c6;padding:6px 12px;text-align:left}code{background:#efeae0;padding:1px 5px;border-radius:4px}a{color:#c2501f}</style></head><body>
+<h1>The arithmetic behind &quot;Claude Duet: does it add up?&quot; (full sheet)</h1>
+<p>Every input is tagged: <strong>T</strong> = Anthropic says, <strong>R</strong> = reported by an outlet or reviewer, <strong>A</strong> = my assumption. Everything else is arithmetic you can redo. Script: <code>duet_calc.py</code> (Python, no libraries).</p>
+<h2>1. Background checks (A: interval)</h2>
+<p>Anthropic says Duet checks connected accounts &quot;every few hours&quot; (T) and that background checks count toward plan usage limits (T). It does not give the interval or the cost of one check.</p>
+<p>If the interval is N hours, checks per day = 24 / N.</p>
+<table><tr><th>Every N hours</th><th>Per day</th><th>Per 30 days</th></tr><tr><td>2</td><td>12</td><td>360</td></tr><tr><td>3</td><td>8</td><td>240</td></tr><tr><td>4</td><td>6</td><td>180</td></tr><tr><td>6</td><td>4</td><td>120</td></tr><tr><td>8</td><td>3</td><td>90</td></tr><tr><td>12</td><td>2</td><td>60</td></tr></table>
+<p><strong>Missing number #1:</strong> the share of a plan&#x27;s allowance one check uses. Without it these counts cannot become a percentage of Pro ($20/month, R) or Max (from $100/month, R).</p>
+<h2>2. Model reality check (R, NOT a Duet test)</h2>
+<p>Zapier AutomationBench, Claude Opus 5.5: 263 of 657 tasks passed = 40.0%; 394 of 657 did not (60.0%). Estimated cost $4.22 per attempted task (R, token-price estimate, not billing), so about 4.22 / 0.40 = $10.54 per pass.</p>
+<h2>3. Safety numbers from Anthropic&#x27;s other reports (R, NOT about Duet)</h2>
+<p>Claude Code auto mode: 0.4% false positives on real traffic; 17% of 52 curated overeager actions not blocked (about 9); 5.7% of 1,000 synthetic data-theft attempts not blocked (57 of 1,000).</p>
+<p>Browser prompt-injection research, an older model (Opus 4.5): 1.4% attack success after 100 attempts per environment.</p>
+<p><strong>Missing number #3:</strong> Duet&#x27;s own failure rate on its safety classifiers: not published (Anthropic says more detail is coming).</p>
+<h2>Missing number #2</h2>
+<p>The guaranteed check interval (&quot;every few hours&quot; is the only statement).</p>
+<h2>What would settle it</h2>
+<p>Independent tests on real tasks; the safety detail Anthropic promised; a few weeks of real usage bills.</p>
+<p>Sources: claude.com/resources/articles/claude-duet; VentureBeat; TestingCatalog; 9to5Mac; Engadget; Every (Dan Shipper&#x27;s Vibe Check); kingy.ai comparison; Peter Yang&#x27;s post on X. I did not test Duet: it is a US-only waitlist preview. I&#x27;m checking arithmetic and claims, not accusing anyone.</p>
+<p><a href="duet_calc.py">duet_calc.py</a> (run: python3 duet_calc.py)</p>
+</body></html>
