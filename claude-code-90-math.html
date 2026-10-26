@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The math: Claude writes 90% of Claude Code? | Anurag on AI</title>
+<style>body{font:17px/1.6 system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#1c1a17;background:#faf8f4}h1{font-size:30px}h2{margin-top:32px;font-size:21px}table{border-collapse:collapse;margin:12px 0}td,th{border:1px solid #d8d2c6;padding:6px 12px;text-align:left}code{background:#efeae0;padding:1px 5px;border-radius:4px}a{color:#c2501f}blockquote{border-left:4px solid #c2501f;margin:12px 0;padding:4px 14px;background:#f2ede3}</style></head><body>
+<h1>The math behind &quot;Claude writes 90% of Claude Code: does that number add up?&quot;</h1>
+<p>Every input is <strong>Anthropic said (A)</strong>, <strong>reported by an outlet (R)</strong> or <strong>my assumption</strong>. Everything else is arithmetic you can redo. Script: <a href="claude_code_90_calc.py"><code>claude_code_90_calc.py</code></a> (Python, no libraries).</p>
+<h2>1. Where the 90% comes from</h2>
+<blockquote>&ldquo;We&rsquo;ve said before that Claude writes about 90 percent of Claude Code&rsquo;s own code.&rdquo; (A) <a href="https://claude.dev/blog/solving-code-review-at-anthropic/">How the Claude Code team does code review</a>, 15 Oct 2026</blockquote>
+<p>That post gives no method, no period and no link for the 90%. Claude Code lives in its own repository, separate from Anthropic&rsquo;s main codebase.</p>
+<h2>2. The measured number</h2>
+<blockquote>&ldquo;As of May 2026, more than 80% of the code we merge into Anthropic&rsquo;s codebase was authored by Claude.&rdquo; (A) <a href="https://www.anthropic.com/institute/recursive-self-improvement">When AI builds itself</a>, June 2026</blockquote>
+<p>Footnote (A): leadership&rsquo;s &ldquo;90% or more&rdquo; estimates include scripts and experimental code; the &gt;80% measures lines merged to production attributable to Claude, and is &ldquo;more conservative&rdquo; (attribution gaps; auto-generated code not credited to Claude). Before Claude Code launched (Feb 2025) the share was &ldquo;in the low single digits&rdquo;.</p>
+<h2>3. 80 vs 90</h2>
+<table><tr><th>Claude share</th><th>Human share</th><th>Human lines</th></tr><tr><td>80%</td><td>20%</td><td>1 in 5</td></tr><tr><td>90%</td><td>10%</td><td>1 in 10</td></tr></table>
+<p>Ten points halve the human share.</p>
+<h2>4. Are humans typing less?</h2>
+<p>(A) Typical engineer merged 8&times; as much code per day in Q2 2026 as in 2024. 8 &times; 20% = <strong>1.6&times;</strong> the human-typed code of 2024. Assumption: the 80% applies to the same lines as the 8&times;.</p>
+<h2>5. Reverts</h2>
+<p>(A) June&rarr;September: merged PRs to Claude Code &ldquo;more than doubled&rdquo;; share reverted &ldquo;fell by more than 40 percent&rdquo;.</p>
+<table><tr><th>PRs</th><th>Revert share</th><th>Total reverts</th></tr><tr><td>&times; 2</td><td>&times; 0.6</td><td><strong>&times; 1.2</strong></td></tr><tr><td>&times; 2.5</td><td>&times; 0.4</td><td>&times; 1.0 (flat)</td></tr></table>
+<p>Raw counts were not published, so we can&rsquo;t tell which row is closer.</p>
+<h2>6. Review load</h2>
+<p>(A) Monorepo changes landing per day: about 2,500 (May) &rarr; more than 30,000 (Sept) = 12&times;. At 10 minutes per review (my assumption): 30,000 &times; 10 / 60 = 5,000 hours/day = <strong>625</strong> full-time readers (8 h).</p>
+<h2>7. One engineer&rsquo;s month</h2>
+<p>(A) <a href="https://simonwillison.net/2025/Dec/27/boris-cherny/">Boris Cherny, 27 Dec 2025</a>: 259 PRs, 497 commits, +40k / &minus;38k lines, &ldquo;every single line&rdquo; by Claude Code. Net +2k lines; 8.6 PRs a day.</p>
+<h2>8. Forecast vs measured</h2>
+<p>(A) <a href="https://www.cfr.org/event/ceo-speaker-series-dario-amodei-anthropic">Dario Amodei, 10 Mar 2025</a>: AI writing 90% of the code &ldquo;in three to six months&rdquo; = Jun&ndash;Sep 2025. Strict measure passed 80% in May 2026: 8&ndash;11 months later.</p>
+<h2>Verdict</h2>
+<p>As a share of lines, 90% is plausible but unmeasured in public. It is not 90% of the work. &ldquo;Fewer mistakes&rdquo; is a ratio: at the stated figures the count of reverts rose about 20%. I didn&rsquo;t measure anything inside Anthropic; every number is theirs or my arithmetic. Not affiliated with Anthropic. Spot an error? Tell me in the YouTube comments.</p>
+<p><a href="index.html">Anurag on AI</a></p>
+</body></html>
