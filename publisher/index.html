@@ -268,14 +268,20 @@ $("postBtn").onclick = async () => {
 };
 
 async function poll(pid) {
+  let errors = 0;
   for (let i = 0; i < 100; i++) {
-    let s; try { s = (await api("/api/publish/status?publish_id=" + encodeURIComponent(pid))).data || {}; } catch (e) { s = {status: "?", fail_reason: e.message}; }
+    let s;
+    try { s = (await api("/api/publish/status?publish_id=" + encodeURIComponent(pid))).data || {}; errors = 0; }
+    catch (e) {   // TikTok's status endpoint sometimes returns a transient 5xx: keep checking, give up after 5 failures in a row
+      if (++errors < 5) { await new Promise(r => setTimeout(r, 3000)); continue; }
+      s = {status: "?", fail_reason: e.message};
+    }
     const done = ["PUBLISH_COMPLETE", "FAILED", "SEND_TO_USER_INBOX"].includes(s.status);
     const cls = ["PUBLISH_COMPLETE", "SEND_TO_USER_INBOX"].includes(s.status) ? "ok" : s.status === "FAILED" ? "bad" : "info";
-    let msg = STATUS[s.status] || ("Status: " + s.status);
+    let msg = s.status === "?" ? "Could not get the status from TikTok (" + s.fail_reason + "). Check your TikTok profile or inbox in a few minutes." : STATUS[s.status] || ("Status: " + s.status);
     if (s.status === "SEND_TO_USER_INBOX") { $("pTitle").textContent = "Sent to your TikTok drafts"; msg = "Sent to TikTok. Open the TikTok app and tap the notification to edit and post your video."; }
     if (s.status === "FAILED" && s.fail_reason) msg += " Reason: " + s.fail_reason + ".";
-    $("pStatus").innerHTML = `<div class="alert ${cls}"></div>`; $("pStatus").firstChild.textContent = msg + (done ? "" : " (checking…)");
+    $("pStatus").innerHTML = `<div class="alert ${cls}"></div>`; $("pStatus").firstChild.textContent = msg + (done || s.status === "?" ? "" : " (checking…)");
     if (s.status === "PUBLISH_COMPLETE") {
       $("pTitle").textContent = "Posted";
       const a = document.createElement("p"); a.innerHTML = `<a href="https://www.tiktok.com/@${encodeURIComponent(creator.creator_username)}" target="_blank" rel="noopener">Open your TikTok profile</a>`;
