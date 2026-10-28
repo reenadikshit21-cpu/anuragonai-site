@@ -243,7 +243,7 @@ $("postBtn").onclick = async () => {
   posting = true; refresh();
   $("composer").classList.add("hidden"); $("progress").classList.remove("hidden"); $("againBtn").classList.add("hidden");
   $("pTitle").textContent = "Uploading to TikTok…"; $("pBar").style.width = "0"; $("pStatus").innerHTML = ""; $("pText").textContent = "";
-  const f = video, bc = $("brandedContent").checked;
+  const f = video, bc = $("brandedContent").checked; f.draftMode = mode() === "draft";
   try {
     const init = await api("/api/publish/init", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({
       video_size: f.size, mime: f.type, mode: mode(),
@@ -259,7 +259,7 @@ $("postBtn").onclick = async () => {
       });
     }
     $("pBar").style.width = "100%"; $("pTitle").textContent = "Upload complete";
-    $("pText").textContent = "Your video was sent to TikTok. It may take a few minutes to process and be visible on your profile.";
+    $("pText").textContent = f.draftMode ? "Your video was sent to TikTok. It will appear in your TikTok inbox in a few minutes." : "Your video was sent to TikTok. It may take a few minutes to process and be visible on your profile.";
     await poll(publish_id);
   } catch (e) {
     $("pTitle").textContent = "Not posted"; $("pStatus").innerHTML = `<div class="alert bad"></div>`; $("pStatus").firstChild.textContent = ERRS[e.code] || e.message;
@@ -272,8 +272,8 @@ async function poll(pid) {
     let s; try { s = (await api("/api/publish/status?publish_id=" + encodeURIComponent(pid))).data || {}; } catch (e) { s = {status: "?", fail_reason: e.message}; }
     const done = ["PUBLISH_COMPLETE", "FAILED", "SEND_TO_USER_INBOX"].includes(s.status);
     const cls = ["PUBLISH_COMPLETE", "SEND_TO_USER_INBOX"].includes(s.status) ? "ok" : s.status === "FAILED" ? "bad" : "info";
+    let msg = STATUS[s.status] || ("Status: " + s.status);
     if (s.status === "SEND_TO_USER_INBOX") { $("pTitle").textContent = "Sent to your TikTok drafts"; msg = "Sent to TikTok. Open the TikTok app and tap the notification to edit and post your video."; }
-    var msg = STATUS[s.status] || ("Status: " + s.status);
     if (s.status === "FAILED" && s.fail_reason) msg += " Reason: " + s.fail_reason + ".";
     $("pStatus").innerHTML = `<div class="alert ${cls}"></div>`; $("pStatus").firstChild.textContent = msg + (done ? "" : " (checking…)");
     if (s.status === "PUBLISH_COMPLETE") {
