@@ -34,6 +34,10 @@ textarea{min-height:110px;resize:vertical}
 .bar{height:10px;background:#eee;border-radius:6px;overflow:hidden;margin:10px 0}
 .bar div{height:100%;width:0;background:var(--accent);transition:width .2s}
 .hidden{display:none!important}
+.modes{display:grid;gap:8px}
+.modes label{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.modes label:has(input:checked){border-color:var(--accent);background:#fdf3ee}
+.modes input{margin-top:5px}
 .tt{position:relative}
 </style></head><body>
 <header class="top"><img class="logo" src="../logo-256.png" alt="AnuragOnAI Publisher icon"><a class="brand" href="../">AnuragOnAI Publisher</a>
@@ -63,6 +67,12 @@ textarea{min-height:110px;resize:vertical}
         <p class="note" id="fileInfo"></p>
       </div>
       <div>
+        <label class="f" style="margin-top:0">How do you want to send it?</label>
+        <div class="modes">
+          <label><input type="radio" name="mode" value="direct" checked> <span><strong>Post to TikTok</strong><br><span class="note">Set the caption and settings here; the app posts it to your profile.</span></span></label>
+          <label><input type="radio" name="mode" value="draft"> <span><strong>Send to TikTok drafts</strong><br><span class="note">Upload only. You add the caption, edit and post it yourself in the TikTok app.</span></span></label>
+        </div>
+        <div id="directFields">
         <label class="f" for="title">Caption</label>
         <textarea id="title" maxlength="2200" placeholder="Write a caption. #hashtags and @mentions work."></textarea>
         <div class="count"><span id="tcount">0</span>/2200</div>
@@ -95,6 +105,7 @@ textarea{min-height:110px;resize:vertical}
         <div class="switch"><span class="t">AI-generated content</span><input type="checkbox" id="aigc" role="switch"></div>
         <p class="note">Turn on if the video was made or substantially edited with AI. TikTok will add an "AI-generated" label.</p>
 
+        </div>
         <p class="consent" id="consent"></p>
         <span id="postWrap" title=""><button id="postBtn" class="btn" disabled>Post to TikTok</button></span>
         <p class="note" id="whyDisabled"></p>
@@ -187,6 +198,8 @@ $("file").onchange = () => {
   v.onerror = () => { $("fileInfo").textContent = "This file could not be read as a video."; refresh(); };
 };
 for (const id of ["privacy", "allowComment", "allowDuet", "allowStitch", "yourBrand", "brandedContent", "aigc"]) $(id).onchange = refresh;
+const mode = () => document.querySelector("input[name=mode]:checked").value;
+for (const r of document.querySelectorAll("input[name=mode]")) r.onchange = refresh;
 $("disclose").onchange = () => { if (!$("disclose").checked) { $("yourBrand").checked = false; $("brandedContent").checked = false; } refresh(); };
 
 function refresh() {
@@ -201,12 +214,17 @@ function refresh() {
   $("bcPrivateNote").classList.toggle("hidden", priv !== "SELF_ONLY");
   $("labelNote").textContent = bc ? "Your video will be labeled as 'Paid partnership'" : yb ? "Your video will be labeled as 'Promotional content'" : "";
   $("consent").innerHTML = bc ? `By posting, you agree to TikTok's ${BCP} and ${MUSIC}.` : `By posting, you agree to TikTok's ${MUSIC}.`;
+  const draft = mode() === "draft";
+  $("directFields").classList.toggle("hidden", draft);
+  $("postBtn").textContent = draft ? "Send to TikTok drafts" : "Post to TikTok";
+  if (draft) $("consent").textContent = "After the upload, TikTok sends you a notification in the TikTok app. Open it to edit, add a caption and post.";
   let why = "";
   if (!video) why = "Choose a video.";
+  else if (draft) why = "";
   else if (!priv) why = "Choose who can view this video.";
   else if (disc && !yb && !bc) why = "You need to indicate if your content promotes yourself, a third party, or both.";
   $("postBtn").disabled = !!why || posting;
-  $("postWrap").title = disc && !yb && !bc ? "You need to indicate if your content promotes yourself, a third party, or both." : "";
+  $("postWrap").title = !draft && disc && !yb && !bc ? "You need to indicate if your content promotes yourself, a third party, or both." : "";
   $("whyDisabled").textContent = posting ? "" : why;
 }
 
@@ -228,7 +246,7 @@ $("postBtn").onclick = async () => {
   const f = video, bc = $("brandedContent").checked;
   try {
     const init = await api("/api/publish/init", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({
-      video_size: f.size, mime: f.type,
+      video_size: f.size, mime: f.type, mode: mode(),
       post_info: {title: $("title").value, privacy_level: $("privacy").value,
         disable_comment: !$("allowComment").checked, disable_duet: !$("allowDuet").checked, disable_stitch: !$("allowStitch").checked,
         brand_content_toggle: bc, brand_organic_toggle: $("yourBrand").checked, is_aigc: $("aigc").checked}})});
@@ -253,8 +271,9 @@ async function poll(pid) {
   for (let i = 0; i < 100; i++) {
     let s; try { s = (await api("/api/publish/status?publish_id=" + encodeURIComponent(pid))).data || {}; } catch (e) { s = {status: "?", fail_reason: e.message}; }
     const done = ["PUBLISH_COMPLETE", "FAILED", "SEND_TO_USER_INBOX"].includes(s.status);
-    const cls = s.status === "PUBLISH_COMPLETE" ? "ok" : s.status === "FAILED" ? "bad" : "info";
-    let msg = STATUS[s.status] || ("Status: " + s.status);
+    const cls = ["PUBLISH_COMPLETE", "SEND_TO_USER_INBOX"].includes(s.status) ? "ok" : s.status === "FAILED" ? "bad" : "info";
+    if (s.status === "SEND_TO_USER_INBOX") { $("pTitle").textContent = "Sent to your TikTok drafts"; msg = "Sent to TikTok. Open the TikTok app and tap the notification to edit and post your video."; }
+    var msg = STATUS[s.status] || ("Status: " + s.status);
     if (s.status === "FAILED" && s.fail_reason) msg += " Reason: " + s.fail_reason + ".";
     $("pStatus").innerHTML = `<div class="alert ${cls}"></div>`; $("pStatus").firstChild.textContent = msg + (done ? "" : " (checking…)");
     if (s.status === "PUBLISH_COMPLETE") {
