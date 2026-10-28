@@ -19,7 +19,10 @@ textarea{min-height:110px;resize:vertical}
 .checks label.off{color:#aaa}
 .switch{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px}
 .switch .t{font-weight:600}
-.switch input{width:44px;height:24px}
+.switch input{appearance:none;-webkit-appearance:none;width:44px;height:24px;border-radius:12px;background:#d6d0c6;position:relative;cursor:pointer;flex:none;margin:0;transition:background .15s}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+.switch input:checked{background:var(--accent)}
+.switch input:checked::after{left:23px}
 .sub{margin:8px 0 0 4px;padding-left:12px;border-left:3px solid var(--line)}
 .note{font-size:14px;color:var(--muted);margin:6px 0 0}
 .note.warn{color:var(--warn)}
@@ -139,6 +142,11 @@ $("loginBtn").onclick = async () => {
 $("logoutBtn").onclick = async () => { try { await api("/api/auth/logout", {method: "POST"}); } catch (e) {} signOutLocal(); };
 
 const CANT = {spam_risk_too_many_posts: "You have reached today's posting limit on TikTok.", spam_risk_user_banned_from_posting: "TikTok is not allowing this account to post.", reached_active_user_cap: "Posting through this app is busy today."};
+const ERRS = {...CANT,
+  unaudited_client_can_only_post_to_private_accounts: "TikTok has not finished reviewing this app yet, so for now it can only post to private TikTok accounts. Set your account to private in TikTok (Settings and privacy > Privacy > Private account) or try again after the review.",
+  privacy_level_option_mismatch: "That privacy option is no longer available for your account. Please choose again.",
+  rate_limit_exceeded: "Too many requests to TikTok. Please wait a minute and try again.",
+  access_token_invalid: "Your TikTok sign-in expired. Please sign in again.", scope_not_authorized: "Please sign in again and allow posting videos."};
 
 async function loadCreator() {
   // Always fetch fresh creator info when the post page is shown.
@@ -236,7 +244,7 @@ $("postBtn").onclick = async () => {
     $("pText").textContent = "Your video was sent to TikTok. It may take a few minutes to process and be visible on your profile.";
     await poll(publish_id);
   } catch (e) {
-    $("pTitle").textContent = "Not posted"; $("pStatus").innerHTML = `<div class="alert bad"></div>`; $("pStatus").firstChild.textContent = e.message;
+    $("pTitle").textContent = "Not posted"; $("pStatus").innerHTML = `<div class="alert bad"></div>`; $("pStatus").firstChild.textContent = ERRS[e.code] || e.message;
   }
   posting = false; $("againBtn").classList.remove("hidden");
 };
